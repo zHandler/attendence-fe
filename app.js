@@ -1,4 +1,5 @@
 const BASE_URL = "http://localhost:3000";
+const cloud_URL = "https://attendence-be-1.onrender.com";
 
 // Register
 function register() {
@@ -11,7 +12,7 @@ function register() {
   if (data.name == null || data.name == "") return alert("enter name")
   if (data.password == null || data.password == "") return alert("enter password")
 
-  fetch(`https://attendence-be-1.onrender.com/auth/register`, {
+  fetch(`${cloud_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -43,7 +44,7 @@ function login() {
   if (data.email == null || data.email == "") return alert("enter email")
   if (data.password == null || data.password == "") return alert("enter password")
 
-  fetch(`https://attendence-be-1.onrender.com/auth/login`, {
+  fetch(`${cloud_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -63,6 +64,7 @@ function login() {
       localStorage.setItem("user", JSON.stringify(msg.data))
       const loggedUser = JSON.parse(localStorage.getItem("user"))
       document.getElementById("userid").classList.remove("hidden")
+      document.getElementById("table").classList.remove("hidden")
       document.getElementById("userid").innerHTML += `<span>${loggedUser.name}</span>`
     });
 }
@@ -83,11 +85,16 @@ function checkIn() {
     shift: "AM"
 
   }
-  fetch(`https://attendence-be-1.onrender.com/in`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) })
+  fetch(`${cloud_URL}/in`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) })
   .then((res)=> res.json())
   .then((fin)=>{
     console.log(fin)
     alert(fin.msg)
+     const Records  = fin.data ; 
+    const finalRecords = Records[Records.length-1]
+    const username = finalRecords.name
+    
+    document.getElementById("table").innerHTML = `<span class="user"> ${username}</span> <span class="text"> start working Now 💪🏢</span>`
   })
   
 }
@@ -107,17 +114,25 @@ function checkOut() {
     shift: "AM"
 
   }
-  fetch(`https://attendence-be-1.onrender.com/out`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) }).then((res)=> res.json()).then((fin)=>{
+  fetch(`${cloud_URL}/out`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) }).then((res)=> res.json()).then((fin)=>{
     console.log(fin)
 
     alert(fin.msg)
+    const Records  = fin.data ; 
+    const finalRecords = Records[Records.length-1]
+    
+ 
+   
+        const username = finalRecords.name
+    
+    document.getElementById("table").innerHTML = `<span class="user"> ${username}</span> <span class="text"> going Home 🏡</span>`
   })
 
 }
 
 // Generate Report
 function generateReport() {
-  fetch(`https://attendence-be-1.onrender.com/report`)
+  fetch(`${cloud_URL}/report`)
     .then(res => res.blob())
     .then(blob => {
       const url = window.URL.createObjectURL(blob);
