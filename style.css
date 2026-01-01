@@ -1,0 +1,74 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  padding: 30px;
+}
+
+section {
+  background: white;
+  padding: .5rem;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  width: 90%;
+
+
+}
+
+input {
+  display: block;
+  margin: 8px 0;
+  padding: 6px;
+  width: 100%;
+}
+
+button {
+  padding: 8px;
+  margin-top: 5px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+
+
+.green {
+  background-color: green;
+  color: white;
+  border: none;
+  border-radius: .5rem;
+  font-size:1.5rem;
+}
+
+.red {
+  background-color: red;
+  border: none;
+  border-radius: .5rem;
+  color: white;
+  font-size: 1.5rem;
+}
+
+
+#repofrm button {
+  background-color: blueviolet;
+  font-size: 1.5rem;
+  width: 100%;
+  border: none;
+  border-radius: .5rem;
+  color: white;
+  
+}
+
+@media screen and (min-width:1024px) {
+  section{
+    width: 50%;
+    margin: 0 auto;
+  }
+  
+}

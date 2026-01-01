@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Attendance App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>Attendance App Dibba Laboratory</h1>
+  <p id="userid"> Current User: </p>
+
+  <!-- Register -->
+  <section id="registerfrm">
+    <h2>Register</h2>
+    <input id="reg-name" placeholder="Name" />
+    <input id="reg-email" placeholder="Email" />
+    <input id="reg-password" type="password" placeholder="Password" />
+    <button onclick="register()">Register</button>
+    <p id="reg-result"></p>
+  </section>
+
+  <!-- Login -->
+  <section class="" id="loginfrm">
+    <h2>Login</h2>
+    <input id="login-email" placeholder="Email" />
+    <input id="login-password" type="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <p id="login-result"></p>
+  </section>
+
+  <!-- Attendance -->
+  <section class="hidden" id="attfrm">
+    <h2>Attendance</h2>
+    <button onclick="checkIn()" class="green">Check In</button>
+    <button onclick="checkOut()" class="red">Check Out</button>
+  </section>
+
+  <!-- Report -->
+  <section class="hidden" id="repofrm">
+    <h2>Report</h2>
+    <button onclick="generateReport()">Generate CSV Report</button>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
