@@ -72,3 +72,18 @@ button {
   }
   
 }
+#registerfrm ,#loginfrm{
+  font-size: 1.3rem;
+}
+#registerfrm button{
+  border-radius: .5rem;
+  border: none;
+  background-color: blue;
+  color: white;
+}
+
+#loginfrm button{ 
+  background-color: greenyellow;
+  border: none;
+  border-radius: .5rem;
+}

@@ -62,6 +62,7 @@ function login() {
       document.getElementById("repofrm").classList.remove("hidden")
       localStorage.setItem("user", JSON.stringify(msg.data))
       const loggedUser = JSON.parse(localStorage.getItem("user"))
+      document.getElementById("userid").classList.remove("hidden")
       document.getElementById("userid").innerHTML += `<span>${loggedUser.name}</span>`
     });
 }
@@ -83,8 +84,12 @@ function checkIn() {
 
   }
   fetch(`https://attendence-be-1.onrender.com/in`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) })
-    .then(res => res.text())
-    .then(alert);
+  .then((res)=> res.json())
+  .then((fin)=>{
+    console.log(fin)
+    alert(fin.msg)
+  })
+  
 }
 
 // Check Out
@@ -102,9 +107,12 @@ function checkOut() {
     shift: "AM"
 
   }
-  fetch(`https://attendence-be-1.onrender.com/out`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) })
-    .then(res => res.text())
-    .then(alert);
+  fetch(`https://attendence-be-1.onrender.com/out`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) }).then((res)=> res.json()).then((fin)=>{
+    console.log(fin)
+
+    alert(fin.msg)
+  })
+
 }
 
 // Generate Report
