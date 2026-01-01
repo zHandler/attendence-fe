@@ -1,4 +1,4 @@
-const BASE_URL = "https://attendence-be-1.onrender.com:3000";
+const BASE_URL = "https://attendence-be-1.onrender.com/";
 
 // Register
 function register() {
@@ -125,6 +125,7 @@ function generateReport() {
     })
     .catch(err => console.error("Download failed", err));
 }
+
 
 
 
