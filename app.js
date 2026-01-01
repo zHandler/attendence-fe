@@ -1,4 +1,4 @@
-const BASE_URL = "https://attendence-be-1.onrender.com/";
+const BASE_URL = "http://localhost:3000";
 
 // Register
 function register() {
@@ -11,7 +11,7 @@ function register() {
   if (data.name == null || data.name == "") return alert("enter name")
   if (data.password == null || data.password == "") return alert("enter password")
 
-  fetch(`${BASE_URL}auth/register`, {
+  fetch(`https://attendence-be-1.onrender.com/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -43,7 +43,7 @@ function login() {
   if (data.email == null || data.email == "") return alert("enter email")
   if (data.password == null || data.password == "") return alert("enter password")
 
-  fetch(`${BASE_URL}auth/login`, {
+  fetch(`https://attendence-be-1.onrender.com/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -82,7 +82,7 @@ function checkIn() {
     shift: "AM"
 
   }
-  fetch(`${BASE_URL}in`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) })
+  fetch(`https://attendence-be-1.onrender.com/in`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) })
     .then(res => res.text())
     .then(alert);
 }
@@ -102,14 +102,14 @@ function checkOut() {
     shift: "AM"
 
   }
-  fetch(`${BASE_URL}out`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) })
+  fetch(`https://attendence-be-1.onrender.com/out`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) })
     .then(res => res.text())
     .then(alert);
 }
 
 // Generate Report
 function generateReport() {
-  fetch(`${BASE_URL}`report")
+  fetch(`https://attendence-be-1.onrender.com/report`)
     .then(res => res.blob())
     .then(blob => {
       const url = window.URL.createObjectURL(blob);
@@ -125,8 +125,3 @@ function generateReport() {
     })
     .catch(err => console.error("Download failed", err));
 }
-
-
-
-
-
