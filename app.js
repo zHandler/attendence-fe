@@ -5,8 +5,8 @@ const BASE_URL = "http://localhost:3000";
    FACILITY CONFIG
 ========================= */
 const FACILITY_LOCATION = {
-  lat: 25.588283,
-  lng: 56.267099,
+  lat: 23.588283,
+  lng: 54.267099,
   radius: 10 // meters
 };
 
@@ -192,4 +192,5 @@ function generateReport() {
       URL.revokeObjectURL(url);
     });
 }
+
 
