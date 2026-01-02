@@ -1,5 +1,18 @@
 const BASE_URL = "http://localhost:3000";
-const cloud_URL = "https://attendence-be-1.onrender.com";
+// const BASE_URL = "https://attendence-be-1.onrender.com";
+
+/* =========================
+   FACILITY CONFIG
+========================= */
+const FACILITY_LOCATION = {
+  lat: 25.588283,
+  lng: 56.267099,
+  radius: 100 // meters
+};
+
+/* =========================
+   AUTH
+========================= */
 
 // Register
 function register() {
@@ -8,30 +21,19 @@ function register() {
     email: document.getElementById("reg-email").value,
     password: document.getElementById("reg-password").value
   };
-  if (data.email == null || data.email == "") return alert("enter email")
-  if (data.name == null || data.name == "") return alert("enter name")
-  if (data.password == null || data.password == "") return alert("enter password")
 
-  fetch(`${cloud_URL}/auth/register`, {
+  if (!data.name || !data.email || !data.password)
+    return alert("All fields are required");
+
+  fetch(`${BASE_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   })
-    .then((res) => res.json())
-    .then((result) => {
-      console.log(result.code)
-
-      if (result.code == 200) {
-
-        document.getElementById("reg-result").innerText = "Registered successfully";
-      }
-      else {
-        document.getElementById("reg-result").innerText = "Registration failed try again";
-
-      }
-    })
-    .catch(() => {
-      document.getElementById("reg-result").innerText = "Registration failed";
+    .then(res => res.json())
+    .then(res => {
+      document.getElementById("reg-result").innerText =
+        res.code === 200 ? "Registered successfully" : "Registration failed";
     });
 }
 
@@ -41,110 +43,152 @@ function login() {
     email: document.getElementById("login-email").value,
     password: document.getElementById("login-password").value
   };
-  if (data.email == null || data.email == "") return alert("enter email")
-  if (data.password == null || data.password == "") return alert("enter password")
 
-  fetch(`${cloud_URL}/auth/login`, {
+  if (!data.email || !data.password)
+    return alert("Email and password required");
+
+  fetch(`${BASE_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   })
     .then(res => res.json())
-    .then(msg => {
-      console.log(msg)
-      console.log(msg)
-      document.getElementById("login-result").innerText = msg.msg;
+    .then(res => {
+      if (!res.data) return alert("Login failed");
 
-      document.getElementById("loginfrm").classList.add("hidden")
-      document.getElementById("registerfrm").classList.add("hidden")
+      localStorage.setItem("user", JSON.stringify(res.data));
 
+      document.getElementById("loginfrm").classList.add("hidden");
+      document.getElementById("registerfrm").classList.add("hidden");
+      document.getElementById("attfrm").classList.remove("hidden");
+      document.getElementById("repofrm").classList.remove("hidden");
 
-      document.getElementById("attfrm").classList.remove("hidden")
-      document.getElementById("repofrm").classList.remove("hidden")
-      localStorage.setItem("user", JSON.stringify(msg.data))
-      const loggedUser = JSON.parse(localStorage.getItem("user"))
-      document.getElementById("userid").classList.remove("hidden")
-      document.getElementById("table").classList.remove("hidden")
-      document.getElementById("userid").innerHTML += `<span>${loggedUser.name}</span>`
+      document.getElementById("userid").innerHTML =
+        `<span>${res.data.name}</span>`;
+      document.getElementById("userid").classList.remove("hidden");
     });
 }
 
-// Check In
-let user = JSON.parse(localStorage.getItem("user"))
+/* =========================
+   GEOLOCATION
+========================= */
+
+// Get user GPS and validate location
+function getUserLocation(onAllowed) {
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+
+      const allowed = isInsideFacility(latitude, longitude);
+      if (allowed) onAllowed();
+    },
+    () => {
+      alert("Location permission is required for attendance");
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  );
+}
+
+// Distance calculation
+function getDistanceInMeters(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const toRad = v => (v * Math.PI) / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLng / 2) ** 2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Check if inside facility
+function isInsideFacility(userLat, userLng) {
+  const distance = getDistanceInMeters(
+    userLat,
+    userLng,
+    FACILITY_LOCATION.lat,
+    FACILITY_LOCATION.lng
+  );
+
+  if (distance <= FACILITY_LOCATION.radius) {
+    console.log("✅ Inside facility");
+    return true;
+  } else {
+    alert("❌ You must be inside the facility to check in/out");
+    return false;
+  }
+}
+
+/* =========================
+   ATTENDANCE
+========================= */
+
 function checkIn() {
-  let time = new Date();
-  const checkin = {
-    type: "in",
-    name: user.name,
-    date: time.toISOString().split("T")[0],
-    now: time.toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    }),
-    shift: "AM"
-
-  }
-  fetch(`${cloud_URL}/in`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) })
-  .then((res)=> res.json())
-  .then((fin)=>{
-    console.log(fin)
-    alert(fin.msg)
-     const Records  = fin.data ; 
-    const finalRecords = Records[Records.length-1]
-    const username = finalRecords.name
-    
-    document.getElementById("table").innerHTML = `<span class="user"> ${username}</span> <span class="text"> start working Now 💪🏢</span>`
-  })
-  
+  getUserLocation(() => sendAttendance("in"));
 }
 
-// Check Out
 function checkOut() {
-  let time = new Date();
-  const checkin = {
-    type: "out",
-    name: user.name,
-    date: time.toISOString().split("T")[0],
-    now: time.toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    }),
-    shift: "AM"
-
-  }
-  fetch(`${cloud_URL}/out`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkin) }).then((res)=> res.json()).then((fin)=>{
-    console.log(fin)
-
-    alert(fin.msg)
-    const Records  = fin.data ; 
-    const finalRecords = Records[Records.length-1]
-    
- 
-   
-        const username = finalRecords.name
-    
-    document.getElementById("table").innerHTML = `<span class="user"> ${username}</span> <span class="text"> going Home 🏡</span>`
-  })
-
+  getUserLocation(() => sendAttendance("out"));
 }
 
-// Generate Report
+function sendAttendance(type) {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) return alert("Not logged in");
+
+  const time = new Date();
+
+  const payload = {
+    type,
+    name: user.name,
+    date: time.toISOString().split("T")[0],
+    now: time.toLocaleTimeString("en-GB"),
+    shift: "AM"
+  };
+
+  fetch(`${BASE_URL}/${type}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+    .then(res => res.json())
+    .then(res => {
+      alert(res.msg);
+      const last = res.data.at(-1);
+      document.getElementById("table").innerHTML =
+        `<span class="user">${last.name}</span>
+         <span class="text">
+           ${type === "in" ? "Start working 💪🏢" : "Going home 🏡"}
+         </span>`;
+    });
+}
+
+/* =========================
+   REPORT
+========================= */
+
 function generateReport() {
-  fetch(`${cloud_URL}/report`)
+  fetch(`${BASE_URL}/report`)
     .then(res => res.blob())
     .then(blob => {
-      const url = window.URL.createObjectURL(blob);
-
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "main_report.csv";
-      document.body.appendChild(a);
+      a.download = "attendance_report.csv";
       a.click();
-
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    })
-    .catch(err => console.error("Download failed", err));
+      URL.revokeObjectURL(url);
+    });
 }
