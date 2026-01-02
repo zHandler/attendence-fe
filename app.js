@@ -1,13 +1,13 @@
-const BASE_URL = "http://localhost:3000";
-// const BASE_URL = "https://attendence-be-1.onrender.com";
+// const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://attendence-be-1.onrender.com"
 
 /* =========================
    FACILITY CONFIG
 ========================= */
 const FACILITY_LOCATION = {
-  lat: 23.588283,
-  lng: 54.267099,
-  radius: 10 // meters
+  lat: 25.588283,
+  lng: 56.267099,
+  radius: 100 // meters
 };
 
 /* =========================
@@ -82,10 +82,13 @@ function getUserLocation(onAllowed) {
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      const { latitude, longitude } = position.coords;
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
 
-      const allowed = isInsideFacility(latitude, longitude);
-      if (allowed) onAllowed();
+      if (!isInsideFacility(latitude, longitude)) return;
+
+      // ✅ pass coordinates to callback
+      onAllowed(latitude, longitude);
     },
     () => {
       alert("Location permission is required for attendance");
@@ -109,8 +112,8 @@ function getDistanceInMeters(lat1, lng1, lat2, lng2) {
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLng / 2) ** 2;
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLng / 2) ** 2;
 
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
@@ -123,6 +126,8 @@ function isInsideFacility(userLat, userLng) {
     FACILITY_LOCATION.lat,
     FACILITY_LOCATION.lng
   );
+
+  console.log("Distance to facility:", Math.round(distance), "meters");
 
   if (distance <= FACILITY_LOCATION.radius) {
     console.log("✅ Inside facility");
@@ -138,14 +143,14 @@ function isInsideFacility(userLat, userLng) {
 ========================= */
 
 function checkIn() {
-  getUserLocation(() => sendAttendance("in"));
+  getUserLocation((lat, lng) => sendAttendance("in", lat, lng));
 }
 
 function checkOut() {
-  getUserLocation(() => sendAttendance("out"));
+  getUserLocation((lat, lng) => sendAttendance("out", lat, lng));
 }
 
-function sendAttendance(type) {
+function sendAttendance(type, lat, lng) {
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user) return alert("Not logged in");
 
@@ -156,7 +161,9 @@ function sendAttendance(type) {
     name: user.name,
     date: time.toISOString().split("T")[0],
     now: time.toLocaleTimeString("en-GB"),
-    shift: "AM"
+    shift: "AM",
+    lat,   // ✅ Correct latitude
+    lng    // ✅ Correct longitude
   };
 
   fetch(`${BASE_URL}/${type}`, {
@@ -166,6 +173,8 @@ function sendAttendance(type) {
   })
     .then(res => res.json())
     .then(res => {
+      if (!res.data) return alert(res.msg);
+
       alert(res.msg);
       const last = res.data.at(-1);
       document.getElementById("table").innerHTML =
@@ -192,5 +201,3 @@ function generateReport() {
       URL.revokeObjectURL(url);
     });
 }
-
-
