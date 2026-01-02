@@ -7,7 +7,7 @@ const BASE_URL = "http://localhost:3000";
 const FACILITY_LOCATION = {
   lat: 25.588283,
   lng: 56.267099,
-  radius: 100 // meters
+  radius: 10 // meters
 };
 
 /* =========================
@@ -192,3 +192,4 @@ function generateReport() {
       URL.revokeObjectURL(url);
     });
 }
+
