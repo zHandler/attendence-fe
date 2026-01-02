@@ -190,14 +190,23 @@ function sendAttendance(type, lat, lng) {
 ========================= */
 
 function generateReport() {
-  fetch(`${BASE_URL}/report`)
+  const start = document.getElementById("start-date").value;
+  const end = document.getElementById("end-date").value;
+
+  let url = `${BASE_URL}/report`;
+  if (start || end) {
+    url += `?start=${start}&end=${end}`;
+  }
+
+  fetch(url)
     .then(res => res.blob())
     .then(blob => {
-      const url = URL.createObjectURL(blob);
+      const downloadUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = downloadUrl;
       a.download = "attendance_report.csv";
       a.click();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(downloadUrl);
     });
 }
+
