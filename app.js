@@ -6,41 +6,35 @@ const BASE_URL = "https://attendence-be-1.onrender.com";
 // =========================
 // AUTH
 // =========================
-
-// Register
 function register() {
-  const data = {
-    name: document.getElementById("reg-name").value,
-    email: document.getElementById("reg-email").value,
-    password: document.getElementById("reg-password").value
-  };
+  const name = document.getElementById("reg-name").value;
+  const email = document.getElementById("reg-email").value;
+  const password = document.getElementById("reg-password").value;
 
-  if (!data.name || !data.email || !data.password)
+  if (!name || !email || !password)
     return alert("All fields are required");
 
   fetch(`${BASE_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify({ name, email, password })
   })
     .then(res => res.json())
-    .then(res => alert(res.msg));
+    .then(res => alert(res.msg))
+    .catch(() => alert("Server error"));
 }
 
-// Login
 function login() {
-  const data = {
-    email: document.getElementById("login-email").value,
-    password: document.getElementById("login-password").value
-  };
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
 
-  if (!data.email || !data.password)
-    return alert("Email and password required");
+  if (!email || !password)
+    return alert("Email & password required");
 
   fetch(`${BASE_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify({ email, password })
   })
     .then(res => res.json())
     .then(res => {
@@ -59,34 +53,32 @@ function login() {
 }
 
 // =========================
-// GEOLOCATION (FIXED)
+// GEOLOCATION (STABLE)
 // =========================
-function getUserLocation(onSuccess) {
+function getUserLocation(callback) {
   if (!navigator.geolocation)
     return alert("Geolocation not supported");
 
   let resolved = false;
 
   const watchId = navigator.geolocation.watchPosition(
-    position => {
+    pos => {
       if (resolved) return;
 
-      // 🔴 Reject weak GPS
-      if (position.coords.accuracy > 100) return;
+      if (pos.coords.accuracy > 100) return;
 
       resolved = true;
       navigator.geolocation.clearWatch(watchId);
 
-      onSuccess(
-        position.coords.latitude,
-        position.coords.longitude
+      callback(
+        pos.coords.latitude,
+        pos.coords.longitude
       );
     },
-    () => alert("Location permission is required"),
+    () => alert("Location permission required"),
     { enableHighAccuracy: true }
   );
 
-  // Fallback timeout
   setTimeout(() => {
     if (!resolved) {
       navigator.geolocation.clearWatch(watchId);
@@ -99,25 +91,36 @@ function getUserLocation(onSuccess) {
 // ATTENDANCE
 // =========================
 function checkIn() {
+  disableButtons();
   getUserLocation((lat, lng) => sendAttendance("in", lat, lng));
 }
 
 function checkOut() {
+  disableButtons();
   getUserLocation((lat, lng) => sendAttendance("out", lat, lng));
+}
+
+function disableButtons() {
+  document.getElementById("checkInBtn").disabled = true;
+  document.getElementById("checkOutBtn").disabled = true;
+}
+
+function enableButtons() {
+  document.getElementById("checkInBtn").disabled = false;
+  document.getElementById("checkOutBtn").disabled = false;
 }
 
 function sendAttendance(type, lat, lng) {
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user) return alert("Not logged in");
 
-  const time = new Date();
+  const now = new Date();
 
   const payload = {
     type,
     name: user.name,
-    date: time.toISOString().split("T")[0],
-    now: time.toLocaleTimeString("en-GB"),
-    shift: "AM",
+    date: now.toISOString().split("T")[0],
+    now: now.toLocaleTimeString("en-GB"),
     lat: Number(lat),
     lng: Number(lng)
   };
@@ -127,24 +130,26 @@ function sendAttendance(type, lat, lng) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   })
-    .then(res => res.json())
+    .then(async res => {
+      const data = await res.json();
+      if (!res.ok) throw data.msg;
+      return data;
+    })
     .then(res => {
-      if (!res.data) return alert(res.msg);
-
       alert(res.msg);
-
-      const last = res.data.at(-1);
       document.getElementById("table").innerHTML = `
-        <span class="user">${last.name}</span>
+        <span class="user">${payload.name}</span>
         <span class="text">
-          ${type === "in" ? "Start working 💪🏢" : "Going home 🏡"}
+          ${type === "in" ? "Checked in 🏢" : "Checked out 🏡"}
         </span>
       `;
-    });
+    })
+    .catch(msg => alert(msg))
+    .finally(enableButtons);
 }
 
 // =========================
-// REPORT
+// DAILY / RANGE REPORT (CSV)
 // =========================
 function generateReport() {
   const start = document.getElementById("start-date").value;
@@ -155,11 +160,31 @@ function generateReport() {
 
   fetch(url)
     .then(res => res.blob())
-    .then(blob => {
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "attendance_report.csv";
-      a.click();
-      URL.revokeObjectURL(a.href);
+    .then(blob => download(blob, "attendance_report.csv"));
+}
+
+// =========================
+// MONTHLY SUMMARY
+// =========================
+function getMonthlySummary() {
+  const month = document.getElementById("month").value;
+  if (!month) return alert("Select month");
+
+  fetch(`${BASE_URL}/summary?month=${month}`)
+    .then(res => res.json())
+    .then(data => {
+      console.table(data);
+      alert("Monthly summary logged to console");
     });
+}
+
+// =========================
+// UTIL
+// =========================
+function download(blob, filename) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
