@@ -4,76 +4,118 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Attendance App</title>
+
+  <!-- GOOGLE FONT -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
+    /* ===== GLOBAL ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+    body { background: #f0f4f8; color: #333; padding: 20px; }
+    h1, h2, h3 { margin-bottom: 10px; }
+    button { cursor: pointer; border: none; border-radius: 6px; transition: all 0.3s ease; }
+    input, button { font-family: inherit; font-size: 16px; }
+
+    /* ===== CONTAINERS ===== */
+    .container { max-width: 500px; margin: auto; }
+    .card { background: #fff; padding: 25px 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
     .hidden { display: none; }
-    button { margin: 5px; padding: 10px 20px; cursor: pointer; }
-    input { margin: 5px; padding: 5px; }
-    #table { margin-top: 20px; }
+
+    /* ===== INPUTS ===== */
+    input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="month"] {
+      width: 100%; padding: 10px 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; outline: none;
+      transition: 0.3s;
+    }
+    input:focus { border-color: #4e89ff; box-shadow: 0 0 5px rgba(78,137,255,0.5); }
+
+    /* ===== BUTTONS ===== */
+    button {
+      background: #4e89ff; color: white; padding: 10px 20px; border-radius: 6px;
+    }
+    button:hover { background: #3866d6; }
+    button:disabled { background: #a1b2ff; cursor: not-allowed; }
+
+    /* ===== USER INFO ===== */
+    #userid {
+      background: #d0e8ff; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; font-weight: 500;
+      text-align: center;
+    }
+
+    /* ===== ATTENDANCE TABLE ===== */
+    #table {
+      margin-top: 15px; padding: 10px; border-radius: 6px; background: #f7f9fc;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+    }
+    #table .user { font-weight: 600; margin-right: 5px; }
+    #table .text { color: #555; }
+
+    /* ===== REPORTS ===== */
+    label { display: block; margin-top: 10px; }
+    p { margin-top: 5px; color: #555; }
+
+    /* ===== HEADINGS ===== */
+    h1 { text-align: center; margin-bottom: 30px; color: #4e89ff; }
+    h2, h3 { color: #333; }
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width: 600px){
+      .container { padding: 0 10px; }
+      input, button { font-size: 14px; }
+    }
   </style>
 </head>
 <body>
 
   <h1>Attendance App</h1>
 
-  <!-- =====================
-       LOGIN FORM
-  ===================== -->
-  <div id="loginfrm">
-    <h2>Login</h2>
-    <input type="email" id="login-email" placeholder="Email"><br>
-    <input type="password" id="login-password" placeholder="Password"><br>
-    <button onclick="login()">Login</button>
+  <div class="container">
+
+    <!-- LOGIN -->
+    <div id="loginfrm" class="card">
+      <h2>Login</h2>
+      <input type="email" id="login-email" placeholder="Email">
+      <input type="password" id="login-password" placeholder="Password">
+      <button onclick="login()">Login</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerfrm" class="card">
+      <h2>Register</h2>
+      <input type="text" id="reg-name" placeholder="Full Name">
+      <input type="email" id="reg-email" placeholder="Email">
+      <input type="password" id="reg-password" placeholder="Password">
+      <button onclick="register()">Register</button>
+    </div>
+
+    <!-- USER INFO -->
+    <div id="userid" class="hidden"></div>
+
+    <!-- ATTENDANCE -->
+    <div id="attfrm" class="card hidden">
+      <h2>Attendance</h2>
+      <button id="checkInBtn" onclick="checkIn()">Check In</button>
+      <button id="checkOutBtn" onclick="checkOut()">Check Out</button>
+      <div id="table"></div>
+    </div>
+
+    <!-- REPORTS -->
+    <div id="repofrm" class="card hidden">
+      <h2>Reports</h2>
+
+      <h3>Daily / Range Report</h3>
+      <label>Start Date: <input type="date" id="start-date"></label>
+      <label>End Date: <input type="date" id="end-date"></label>
+      <button onclick="generateReport()">Download CSV</button>
+
+      <h3>Monthly Summary</h3>
+      <label>Month: <input type="month" id="month"></label>
+      <button onclick="getMonthlySummary()">Get Summary</button>
+      <p>Check console for summary output</p>
+    </div>
+
   </div>
 
-  <!-- =====================
-       REGISTER FORM
-  ===================== -->
-  <div id="registerfrm">
-    <h2>Register</h2>
-    <input type="text" id="reg-name" placeholder="Full Name"><br>
-    <input type="email" id="reg-email" placeholder="Email"><br>
-    <input type="password" id="reg-password" placeholder="Password"><br>
-    <button onclick="register()">Register</button>
-  </div>
-
-  <!-- =====================
-       USER INFO
-  ===================== -->
-  <div id="userid" class="hidden"></div>
-
-  <!-- =====================
-       ATTENDANCE BUTTONS
-  ===================== -->
-  <div id="attfrm" class="hidden">
-    <h2>Attendance</h2>
-    <button id="checkInBtn" onclick="checkIn()">Check In</button>
-    <button id="checkOutBtn" onclick="checkOut()">Check Out</button>
-
-    <div id="table"></div>
-  </div>
-
-  <!-- =====================
-       REPORTS
-  ===================== -->
-  <div id="repofrm" class="hidden">
-    <h2>Reports</h2>
-
-    <h3>Daily / Range Report</h3>
-    <label>Start Date: <input type="date" id="start-date"></label>
-    <label>End Date: <input type="date" id="end-date"></label>
-    <button onclick="generateReport()">Download CSV</button>
-
-    <h3>Monthly Summary</h3>
-    <label>Month: <input type="month" id="month"></label>
-    <button onclick="getMonthlySummary()">Get Summary</button>
-    <p>Check console for summary output</p>
-  </div>
-
-  <!-- =====================
-       JS SCRIPT
-  ===================== -->
-  <script src="./app.js"></script>
+  <script src="attendance.js"></script>
 
 </body>
 </html>
