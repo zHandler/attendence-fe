@@ -84,6 +84,7 @@ function getUserLocation(onAllowed) {
     (position) => {
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
+       console.log({long: longitude, lati: latitude});
 
       if (!isInsideFacility(latitude, longitude)) return;
 
@@ -209,4 +210,5 @@ function generateReport() {
       URL.revokeObjectURL(downloadUrl);
     });
 }
+
 
