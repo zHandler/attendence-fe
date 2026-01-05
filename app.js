@@ -128,6 +128,8 @@ function isInsideFacility(userLat, userLng) {
     FACILITY_LOCATION.lng
   );
 
+   console.log({userlong:userLng, userLat: userLat})
+
   console.log("Distance to facility:", Math.round(distance), "meters");
 
   if (distance <= FACILITY_LOCATION.radius) {
@@ -210,5 +212,6 @@ function generateReport() {
       URL.revokeObjectURL(downloadUrl);
     });
 }
+
 
 
