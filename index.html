@@ -1,66 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Attendance App</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .hidden { display: none; }
+    button { margin: 5px; padding: 10px 20px; cursor: pointer; }
+    input { margin: 5px; padding: 5px; }
+    #table { margin-top: 20px; }
+  </style>
 </head>
 <body>
 
-  <h1>Attendance App Dibba Laboratory</h1>
-  <p id="userid" class="visually-hidden"> Current User: </p>
+  <h1>Attendance App</h1>
 
-  <!-- Register -->
-  <section id="registerfrm">
-    <h2>Register</h2>
-    <input id="reg-name" placeholder="Name" />
-    <input id="reg-email" placeholder="Email" />
-    <input id="reg-password" type="password" placeholder="Password" />
-    <button onclick="register()">Register</button>
-    <p id="reg-result"></p>
-  </section>
-
-  <!-- Login -->
-  <section class="" id="loginfrm">
+  <!-- =====================
+       LOGIN FORM
+  ===================== -->
+  <div id="loginfrm">
     <h2>Login</h2>
-    <input id="login-email" placeholder="Email" />
-    <input id="login-password" type="password" placeholder="Password" />
+    <input type="email" id="login-email" placeholder="Email"><br>
+    <input type="password" id="login-password" placeholder="Password"><br>
     <button onclick="login()">Login</button>
-    <p id="login-result"></p>
-  </section>
+  </div>
 
-  <!-- Attendance -->
-  <section class="hidden" id="attfrm">
+  <!-- =====================
+       REGISTER FORM
+  ===================== -->
+  <div id="registerfrm">
+    <h2>Register</h2>
+    <input type="text" id="reg-name" placeholder="Full Name"><br>
+    <input type="email" id="reg-email" placeholder="Email"><br>
+    <input type="password" id="reg-password" placeholder="Password"><br>
+    <button onclick="register()">Register</button>
+  </div>
+
+  <!-- =====================
+       USER INFO
+  ===================== -->
+  <div id="userid" class="hidden"></div>
+
+  <!-- =====================
+       ATTENDANCE BUTTONS
+  ===================== -->
+  <div id="attfrm" class="hidden">
     <h2>Attendance</h2>
-    <button onclick="checkIn()" class="green">Check In</button>
-    <button onclick="checkOut()" class="red">Check Out</button>
-  </section>
+    <button id="checkInBtn" onclick="checkIn()">Check In</button>
+    <button id="checkOutBtn" onclick="checkOut()">Check Out</button>
 
-  <!-- Report -->
-  <section class="hidden" id="repofrm">
-    <h2>Report</h2>
-  Start: <input type="date" id="start-date">
-End: <input type="date" id="end-date">
-<button onclick="generateReport()">Download Report</button>
-    <input type="month" id="month">
-<button onclick="getMonthlySummary()">Monthly Summary</button>
+    <div id="table"></div>
+  </div>
 
-  </section>
+  <!-- =====================
+       REPORTS
+  ===================== -->
+  <div id="repofrm" class="hidden">
+    <h2>Reports</h2>
 
-  <section id="table" class="hidden">
-    <thead>
-     
-    </thead>
-    <tbody>
-      <tr  id="records">
+    <h3>Daily / Range Report</h3>
+    <label>Start Date: <input type="date" id="start-date"></label>
+    <label>End Date: <input type="date" id="end-date"></label>
+    <button onclick="generateReport()">Download CSV</button>
 
-      </tr>
-      
-    </tbody>
-  </section>
+    <h3>Monthly Summary</h3>
+    <label>Month: <input type="month" id="month"></label>
+    <button onclick="getMonthlySummary()">Get Summary</button>
+    <p>Check console for summary output</p>
+  </div>
 
-  <script src="app.js"></script>
+  <!-- =====================
+       JS SCRIPT
+  ===================== -->
+  <script src="./app.js"></script>
+
 </body>
 </html>
-
-
