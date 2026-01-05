@@ -1,7 +1,7 @@
 // =========================
 // CONFIG
 // =========================
-const BASE_URL = "https://attendence-be-1.onrender.com";
+const BASE_URL = "https://attendence-be-2arx.onrender.com/";
 
 // =========================
 // AUTH
@@ -188,3 +188,4 @@ function download(blob, filename) {
   a.click();
   URL.revokeObjectURL(a.href);
 }
+
