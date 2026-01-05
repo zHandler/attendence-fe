@@ -30,7 +30,7 @@
 
     /* ===== BUTTONS ===== */
     button {
-      background: #4e89ff; color: white; padding: 10px 20px; border-radius: 6px;
+      background: #4e89ff; color: white; padding: 10px 20px; border-radius: 6px; margin-top: 5px;
     }
     button:hover { background: #3866d6; }
     button:disabled { background: #a1b2ff; cursor: not-allowed; }
@@ -62,6 +62,9 @@
       .container { padding: 0 10px; }
       input, button { font-size: 14px; }
     }
+
+    /* ===== TOGGLE LINK ===== */
+    .toggle-link { color: #4e89ff; cursor: pointer; text-decoration: underline; font-size: 14px; display: inline-block; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -76,15 +79,17 @@
       <input type="email" id="login-email" placeholder="Email">
       <input type="password" id="login-password" placeholder="Password">
       <button onclick="login()">Login</button>
+      <span class="toggle-link" onclick="toggleForms()">Don't have an account? Register</span>
     </div>
 
     <!-- REGISTER -->
-    <div id="registerfrm" class="card">
+    <div id="registerfrm" class="card hidden">
       <h2>Register</h2>
       <input type="text" id="reg-name" placeholder="Full Name">
       <input type="email" id="reg-email" placeholder="Email">
       <input type="password" id="reg-password" placeholder="Password">
       <button onclick="register()">Register</button>
+      <span class="toggle-link" onclick="toggleForms()">Already have an account? Login</span>
     </div>
 
     <!-- USER INFO -->
@@ -115,7 +120,19 @@
 
   </div>
 
+  <!-- =====================
+       JS SCRIPT
+  ===================== -->
   <script src="attendance.js"></script>
+  <script>
+    // Toggle between login and register forms
+    function toggleForms() {
+      const login = document.getElementById("loginfrm");
+      const register = document.getElementById("registerfrm");
+      login.classList.toggle("hidden");
+      register.classList.toggle("hidden");
+    }
+  </script>
 
 </body>
 </html>
