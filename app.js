@@ -1,18 +1,11 @@
-// const BASE_URL = "http://localhost:3000";
-const BASE_URL = "https://attendence-be-1.onrender.com"
+// =========================
+// CONFIG
+// =========================
+const BASE_URL = "https://attendence-be-1.onrender.com";
 
-/* =========================
-   FACILITY CONFIG
-========================= */
-const FACILITY_LOCATION = {
-  lat: 25.588283,
-  lng: 56.267099,
-  radius: 100 // meters
-};
-
-/* =========================
-   AUTH
-========================= */
+// =========================
+// AUTH
+// =========================
 
 // Register
 function register() {
@@ -31,10 +24,7 @@ function register() {
     body: JSON.stringify(data)
   })
     .then(res => res.json())
-    .then(res => {
-      document.getElementById("reg-result").innerText =
-        res.code === 200 ? "Registered successfully" : "Registration failed";
-    });
+    .then(res => alert(res.msg));
 }
 
 // Login
@@ -54,7 +44,7 @@ function login() {
   })
     .then(res => res.json())
     .then(res => {
-      if (!res.data) return alert("Login failed");
+      if (!res.data) return alert(res.msg);
 
       localStorage.setItem("user", JSON.stringify(res.data));
 
@@ -63,88 +53,51 @@ function login() {
       document.getElementById("attfrm").classList.remove("hidden");
       document.getElementById("repofrm").classList.remove("hidden");
 
-      document.getElementById("userid").innerHTML =
-        `<span>${res.data.name}</span>`;
+      document.getElementById("userid").innerText = res.data.name;
       document.getElementById("userid").classList.remove("hidden");
     });
 }
 
-/* =========================
-   GEOLOCATION
-========================= */
+// =========================
+// GEOLOCATION (FIXED)
+// =========================
+function getUserLocation(onSuccess) {
+  if (!navigator.geolocation)
+    return alert("Geolocation not supported");
 
-// Get user GPS and validate location
-function getUserLocation(onAllowed) {
-  if (!navigator.geolocation) {
-    alert("Geolocation not supported");
-    return;
-  }
+  let resolved = false;
 
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
-       console.log({long: longitude, lati: latitude});
+  const watchId = navigator.geolocation.watchPosition(
+    position => {
+      if (resolved) return;
 
-      if (!isInsideFacility(latitude, longitude)) return;
+      // 🔴 Reject weak GPS
+      if (position.coords.accuracy > 100) return;
 
-      // ✅ pass coordinates to callback
-      onAllowed(latitude, longitude);
+      resolved = true;
+      navigator.geolocation.clearWatch(watchId);
+
+      onSuccess(
+        position.coords.latitude,
+        position.coords.longitude
+      );
     },
-    () => {
-      alert("Location permission is required for attendance");
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
+    () => alert("Location permission is required"),
+    { enableHighAccuracy: true }
+  );
+
+  // Fallback timeout
+  setTimeout(() => {
+    if (!resolved) {
+      navigator.geolocation.clearWatch(watchId);
+      alert("Unable to get accurate GPS location");
     }
-  );
+  }, 8000);
 }
 
-// Distance calculation
-function getDistanceInMeters(lat1, lng1, lat2, lng2) {
-  const R = 6371000;
-  const toRad = v => (v * Math.PI) / 180;
-
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) *
-    Math.cos(toRad(lat2)) *
-    Math.sin(dLng / 2) ** 2;
-
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-// Check if inside facility
-function isInsideFacility(userLat, userLng) {
-  const distance = getDistanceInMeters(
-    userLat,
-    userLng,
-    FACILITY_LOCATION.lat,
-    FACILITY_LOCATION.lng
-  );
-
-   console.log({userlong:userLng, userLat: userLat})
-
-  console.log("Distance to facility:", Math.round(distance), "meters");
-
-  if (distance <= FACILITY_LOCATION.radius) {
-    console.log("✅ Inside facility");
-    return true;
-  } else {
-    alert("❌ You must be inside the facility to check in/out");
-    return false;
-  }
-}
-
-/* =========================
-   ATTENDANCE
-========================= */
-
+// =========================
+// ATTENDANCE
+// =========================
 function checkIn() {
   getUserLocation((lat, lng) => sendAttendance("in", lat, lng));
 }
@@ -165,8 +118,8 @@ function sendAttendance(type, lat, lng) {
     date: time.toISOString().split("T")[0],
     now: time.toLocaleTimeString("en-GB"),
     shift: "AM",
-    lat,   // ✅ Correct latitude
-    lng    // ✅ Correct longitude
+    lat: Number(lat),
+    lng: Number(lng)
   };
 
   fetch(`${BASE_URL}/${type}`, {
@@ -179,39 +132,34 @@ function sendAttendance(type, lat, lng) {
       if (!res.data) return alert(res.msg);
 
       alert(res.msg);
+
       const last = res.data.at(-1);
-      document.getElementById("table").innerHTML =
-        `<span class="user">${last.name}</span>
-         <span class="text">
-           ${type === "in" ? "Start working 💪🏢" : "Going home 🏡"}
-         </span>`;
+      document.getElementById("table").innerHTML = `
+        <span class="user">${last.name}</span>
+        <span class="text">
+          ${type === "in" ? "Start working 💪🏢" : "Going home 🏡"}
+        </span>
+      `;
     });
 }
 
-/* =========================
-   REPORT
-========================= */
-
+// =========================
+// REPORT
+// =========================
 function generateReport() {
   const start = document.getElementById("start-date").value;
   const end = document.getElementById("end-date").value;
 
   let url = `${BASE_URL}/report`;
-  if (start || end) {
-    url += `?start=${start}&end=${end}`;
-  }
+  if (start || end) url += `?start=${start}&end=${end}`;
 
   fetch(url)
     .then(res => res.blob())
     .then(blob => {
-      const downloadUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = downloadUrl;
+      a.href = URL.createObjectURL(blob);
       a.download = "attendance_report.csv";
       a.click();
-      URL.revokeObjectURL(downloadUrl);
+      URL.revokeObjectURL(a.href);
     });
 }
-
-
-
