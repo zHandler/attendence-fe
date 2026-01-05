@@ -61,6 +61,9 @@
     <h2>Attendance</h2>
     <button id="checkInBtn">Check In</button>
     <button id="checkOutBtn">Check Out</button>
+    <button id="logoutBtn">Logout</button>
+<button id="deleteBtn">Delete last record</button>
+
     <div id="table"></div>
   </div>
 
@@ -214,10 +217,34 @@
         document.getElementById("monthly-summary-table").innerHTML = html;
       });
   }
+// LOGOUT
+document.getElementById("logoutBtn").addEventListener("click",()=>{
+  localStorage.removeItem("user");
+  location.reload();
+});
+
+// DELETE LAST RECORD
+document.getElementById("deleteBtn").addEventListener("click",()=>{
+  const user=JSON.parse(localStorage.getItem("user"));
+  if(!user) return alert("Not logged in");
+  const date=new Date().toISOString().split("T")[0];
+  const type=prompt("Which record to delete? (in/out)");
+  if(type!=="in" && type!=="out") return alert("Invalid type");
+
+  fetch(`${BASE_URL}/delete`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({name:user.name,date,type})
+  }).then(r=>r.json()).then(res=>{
+    alert(res.msg);
+    document.getElementById("table").innerHTML="";
+  });
+});
 
 </script>
 
 </body>
 </html>
+
 
 
